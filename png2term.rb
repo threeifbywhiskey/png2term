@@ -16,8 +16,18 @@ end
 sprite = ChunkyPNG::Image.from_stream ARGF
 
 (0...sprite.height).step(2).each do |y|
-  top = sprite.row(y).map     { |p| term *rgb(p) }
-  bot = sprite.row(y + 1).map { |p| term *rgb(p) } rescue [0] * sprite.width
-  top.zip(bot).each { |t, b| print "\e[48;5;#{b}m\e[38;5;#{t}m▀" }
+  top = sprite.row(y).map     { |p| p == 0 ? 0 : term(*rgb(p)) }
+  bot = sprite.row(y + 1).map { |p| p == 0 ? 0 : term(*rgb(p)) } rescue [0].cycle
+  top.zip(bot).each do |t, b|
+    if t == 0 && b == 0
+      print "\e[0m "
+    elsif t == 0
+      print "\e[0m\e[38;5;#{b}m▄"
+    elsif b == 0
+      print "\e[0m\e[38;5;#{t}m▀"
+    else
+      print "\e[48;5;#{b}m\e[38;5;#{t}m▀"
+    end
+  end
   puts "\e[0m"
 end
